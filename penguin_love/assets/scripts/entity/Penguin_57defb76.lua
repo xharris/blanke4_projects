@@ -33,7 +33,6 @@ function Penguin:init(x, y)
     self.ani_walk = anim8.newAnimation(self.spr_outline('1-2', 1), 0.05);
     
     Signal.register('love.update', function(dt) self:update(dt) end)
-    Signal.register('love.draw', function() self:draw() end)
 end
 
 function Penguin:update(dt)

@@ -97,12 +97,13 @@ function Play:enter(previous)
     
     client:on("connect", function()
         print("connected to server")
+            
     	client:send("broadcast", {
             ["msg_type"]="add_penguin",
             ["id"]=client:getConnectId(),
             ["color"]=new_player.penguin.color,
-            ["x"]=new_player.penguin.x,
-            ["y"]=new_player.penguin.y
+            ["x"]=new_player.x,
+            ["y"]=new_player.y + 20
         }) 
    	end)
     
@@ -115,13 +116,13 @@ function Play:enter(previous)
         print("add penguin: " .. tostring(info.id) .. " x=" .. tostring(info.x) .. " y=" .. tostring(info.y) .. 
                 " color=" .. tostring(info.color[1]) .. ',' .. tostring(info.color[2]) .. ',' .. tostring(info.color[3]))
             
+        local cam_x, cam_y = camera:position()
         local new_penguin = Penguin(info.x, info.y)
         new_penguin.color = info.color
-        table[tostring(info.id)] = new_penguin
+        penguins[tostring(info.id)] = new_penguin
    	end)
     
     client:connect()
-    
 
     camera = Camera(new_player.x, new_player.y, 1, math.rad(cam_angle))
     

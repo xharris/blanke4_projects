@@ -109,6 +109,7 @@ function Player:draw()
     self.penguin.x = love.graphics.getWidth()/2--self.x
     self.penguin.y = love.graphics.getHeight()/2--self.y
     self.penguin.angle = self.angle
+    self.penguin:draw()
 end
 
 return Player
