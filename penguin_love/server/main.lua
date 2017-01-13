@@ -1,23 +1,33 @@
 require "LUBE"
 require "console"
 
-function onConnect(ip, port)
-  	mPrint("Connection from " .. ip)
-end
-function onReceive(data, ip, port)
-  	mPrint(ip .. ' ' .. data)
-end
-function onDisconnect(ip, port)
-  	mPrint("Disconnection from " .. ip)
-end
+sock = require "sock.sock"
+bitser = require "sock.spec.bitser"
 
-server = lube.server(18025)
-server:setCallback(onReceive, onConnect, onDisconnect)
-server:setHandshake("penguin")
+-- users
 
+function love.load()
+    server = sock.newServer()
+    server:setSerialization(bitser.dumps, bitser.loads)
+
+    server:on("connect", function(data, client)
+        mPrint("Connection from " .. tostring(client:getAddress()) .. " (" .. client:getConnectId() .. ")")
+        server:sendToAllBut(client, "player_join", {
+            ["ip"]=client:getAddress(),
+            ["connectid"]=client:getConnectId()
+        })
+    end)
+    
+    server:on("broadcast", function(data, client)
+        mPrint("broadcast: " .. data.msg_type)
+        local msg_type = data.msg_type
+        data.msg_type = nil
+        server:sendToAllBut(client, msg_type, data)
+    end)
+end
 
 function love.update(dt)
-  	server:update(dt)
+  	server:update()
 end
 
 function love.draw()

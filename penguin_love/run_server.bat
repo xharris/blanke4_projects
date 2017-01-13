@@ -1,1 +1,1 @@
-"C:\Users\XHH\Documents\PROJECTS\blanke4\releases\gamething-win32-ia32\resources\app\engines\love2d\love-0.10.2-win32\love.exe" "C:\Users\XHH\Documents\PROJECTS\blanke4\projects\penguin_love\server"
+"C:\Users\XHH\Documents\PROJECTS\blanke4\releases\BlankE-win32-ia32\resources\app\engines\love2d\love-0.10.2-win32\love.exe" "C:\Users\XHH\Documents\PROJECTS\blanke4_projects\penguin_love\server"

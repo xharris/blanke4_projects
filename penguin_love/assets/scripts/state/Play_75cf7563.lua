@@ -81,16 +81,9 @@ function load_level(name)
     level_offset.y = level_offset.y + (l_end.y - l_start.y)
 end
 
-function onReceive(data)
-	 
-end
-	
 -- Called once, and only once, before entering the state the first time.
 function Play:init()
-    client = lube.client()
-    client:setHandshake("penguin")
-    client:setCallback(onReceive)
-    client:connect("127.0.0.1", 18025)
+
 end
 
 -- Called every time when entering the state.
@@ -98,8 +91,38 @@ function Play:enter(previous)
     love.graphics.setBackgroundColor(224, 247, 250)
 	new_player = Player()
     
-    client:send(
+    -- networking stuff
+    client = sock.newClient()
+    client:setSerialization(bitser.dumps, bitser.loads)
     
+    client:on("connect", function()
+        print("connected to server")
+    	client:send("broadcast", {
+            ["msg_type"]="add_penguin",
+            ["id"]=client:getConnectId(),
+            ["color"]=new_player.penguin.color,
+            ["x"]=new_player.penguin.x,
+            ["y"]=new_player.penguin.y
+        }) 
+   	end)
+    
+    client:on("player_join", function(player)
+        print("new player: " .. player.connectid)
+    end)
+    
+    -- new player has joined server
+    client:on("add_penguin", function(info)
+        print("add penguin: " .. tostring(info.id) .. " x=" .. tostring(info.x) .. " y=" .. tostring(info.y) .. 
+                " color=" .. tostring(info.color[1]) .. ',' .. tostring(info.color[2]) .. ',' .. tostring(info.color[3]))
+            
+        local new_penguin = Penguin(info.x, info.y)
+        new_penguin.color = info.color
+        table[tostring(info.id)] = new_penguin
+   	end)
+    
+    client:connect()
+    
+
     camera = Camera(new_player.x, new_player.y, 1, math.rad(cam_angle))
     
     --load_level("test2")
@@ -109,12 +132,13 @@ function Play:enter(previous)
 end 
 
 function Play:update(dt)
-    client:update(dt)
+    client:update()
+    
 	new_player:update(dt)
     camera:lookAt(new_player.x, new_player.y)
     
     for m, map in pairs(world) do
-        map:update(dt)
+        map:update()
     end
     
     if kill_wall ~= nil then    
@@ -135,16 +159,15 @@ function Play:update(dt)
 end	
 
 function Play:draw()
-    camera:attach() 
+    camera:attach()  
+    for p, peng in pairs(penguins) do
+       	peng:draw() 
+    end
     for t, tile in pairs(tiles) do
 	 	tile:draw()
     end
     camera:detach()
-    
-    for p, peng in pairs(penguins) do
-       	peng:draw() 
-    end
-    
+
    	new_player:draw() 
 end
 

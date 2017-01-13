@@ -8,6 +8,9 @@ anim8 = require 'plugins.anim8'
 HC = require 'assets.includes.HC'
 require 'assets.includes.LUBE'
 
+sock = require 'assets.includes.sock.sock'
+bitser = require 'assets.includes.sock.spec.bitser'
+
 require "assets.includes.printr"
 
 assets = require 'assets'
