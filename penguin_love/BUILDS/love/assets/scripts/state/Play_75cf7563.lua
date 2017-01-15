@@ -181,6 +181,7 @@ function Play:keyreleased(key)
 end
 
 function Play:update(dt)
+    player_timer:update(dt)
     client:update()
     
     -- update players
@@ -213,8 +214,7 @@ function Play:update(dt)
     end 
 end	
 
-function Play:draw()
-    camera:attach()  
+function Play:draw() 
     for p, player in pairs(other_players) do
        	if player ~= nil then
         	player:draw() 
@@ -223,6 +223,7 @@ function Play:draw()
     for t, tile in pairs(tiles) do
 	 	tile:draw()
     end
+    camera:attach() 
     camera:detach()
 
    	new_player:draw() 
