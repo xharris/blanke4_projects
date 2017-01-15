@@ -15,8 +15,9 @@ local level_offset = {
 local level_height = 1
 
 local client
+local player_timer
+other_players = {}
 
-penguins = {}
 tiles = {}
 frags = {}
 
@@ -98,28 +99,56 @@ function Play:enter(previous)
     client:on("connect", function()
         print("connected to server")
             
+        local cam_x, cam_y = camera:position()  
+            
     	client:send("broadcast", {
             ["msg_type"]="add_penguin",
-            ["id"]=client:getConnectId(),
+            ["id"]=tostring(client:getConnectId()),
             ["color"]=new_player.penguin.color,
-            ["x"]=new_player.x,
-            ["y"]=new_player.y + 20
+            ["x"]=new_player.x, -- ,cam_x,
+            ["y"]=new_player.y -- cam_y
         }) 
    	end)
     
+    -- how often player will update everything
+    player_timer = Timer:new()
+    player_timer:every(1, function() 
+        new_player:net_update()
+    end)
+    
+    -- new player has joined server
     client:on("player_join", function(player)
         print("new player: " .. player.connectid)
     end)
     
-    -- new player has joined server
+    -- new player --> add a penguin
     client:on("add_penguin", function(info)
         print("add penguin: " .. tostring(info.id) .. " x=" .. tostring(info.x) .. " y=" .. tostring(info.y) .. 
                 " color=" .. tostring(info.color[1]) .. ',' .. tostring(info.color[2]) .. ',' .. tostring(info.color[3]))
             
-        local cam_x, cam_y = camera:position()
-        local new_penguin = Penguin(info.x, info.y)
-        new_penguin.color = info.color
-        penguins[tostring(info.id)] = new_penguin
+        local net_player = Player()
+        net_player:convertNetPlayer()
+        net_player.x = info.x
+        net_player.y = info.y
+        net_player.penguin.color = info.color
+        other_players[info.id] = net_player
+   	end)
+    
+    -- player has left the server
+    client:on("player_leave", function(info)
+        print("bye leave: " .. tostring(info.id))
+    	other_players[info.id] = nil        
+    end)
+    
+    -- player movement
+    client:on("player_move", function(info)
+        other_player = other_players[info.id]
+        if other_player ~= nil then
+            other_player.x = info.x
+            other_player.y = info.y
+            other_player.dx = info.dx
+            other_player.dy = info.dy
+        end
    	end)
     
     client:connect()
@@ -130,18 +159,43 @@ function Play:enter(previous)
     load_level("test")
     load_level("1")
     load_level("test")
+
+    Signal.register("player_move", function(x, y, dx, dy) 
+    	client:send("broadcast", {
+        	["msg_type"]="player_move",
+            ["id"]=tostring(client:getConnectId()),
+            ["x"]=x,
+            ["y"]=y,
+            ["dx"]=dx,
+            ["dy"]=dy
+    	})
+    end)
 end 
+
+function Play:keypressed(key)
+    new_player:keypressed(key)
+end
+
+function Play:keyreleased(key)
+    new_player:keyreleased(key)
+end
 
 function Play:update(dt)
     client:update()
     
+    -- update players
 	new_player:update(dt)
-    camera:lookAt(new_player.x, new_player.y)
+	for p, player in pairs(other_players) do
+       	player:update(dt) 
+    end
     
+    camera:lookAt(new_player.x, new_player.y)
+
     for m, map in pairs(world) do
         map:update()
     end
     
+    -- move the kill wall
     if kill_wall ~= nil then    
     	kill_wall:move(kill_wall_v, 0)
         
@@ -161,8 +215,10 @@ end
 
 function Play:draw()
     camera:attach()  
-    for p, peng in pairs(penguins) do
-       	peng:draw() 
+    for p, player in pairs(other_players) do
+       	if player ~= nil then
+        	player:draw() 
+        end
     end
     for t, tile in pairs(tiles) do
 	 	tile:draw()
@@ -173,7 +229,11 @@ function Play:draw()
 end
 
 function Player:quit()
-   	client:disconnect() 
+    client:send("broadcast", {
+    	["msg_type"]="player_leave",
+        ["id"]=tostring(client:getConnectId())
+    })
+   	-- client:disconnectLater() 
 end
 
 return Play
