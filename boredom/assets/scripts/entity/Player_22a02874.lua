@@ -14,8 +14,8 @@ function Player:init(x, y)
     self.dy = 0
     self.gravity = 0
     self.can_jump = true
-    self.body = HC.circle(5,5,20)
-    self.feet = HC.rectangle(5,5,20,20)
+    self.body = HC.rectangle(self.x,self.y,18,35)
+    self.feet = HC.rectangle(10,35,16,1)
     
 	self.img_stand = assets:img_player_stand()
     self.img_walk = assets:img_player_walk()
@@ -23,6 +23,9 @@ function Player:init(x, y)
     
     self.anim = anim8.newAnimation(self.spr_walk('1-2',1), 0.1)
 end
+
+local vx
+local vy
 
 function Player:update(dt)
     self.anim:update(dt)
@@ -38,52 +41,59 @@ function Player:update(dt)
         self.body:move(self.dx, 0)
     end
 
-    -- jumping
-    if love.keyboard.isDown("up") and self.can_jump then
-        self.dy = -self.jump_power
-        self.can_jump = false
-    end
-
     -- gravity    
     self.dy = self.dy + (self.gravity * dt)
+    self.gravity = self.GRAVITY 
 
-    self.feet:moveTo(self.x, self.y + 34 + self.dy)
 
-    -- colliding with ground
+    -- body collisions
     for other, seperating_vector in pairs(body_collisions) do
         if other.type == "ground" then
+            vx = seperating_vector.x
+            vy = seperating_vector.y
             self.body:move(seperating_vector.x, seperating_vector.y)
         end
 
         self_left, self_top, self_right, self_bottom = self.body:bbox()
         other_left, other_top, other_right, other_bottom = other:bbox()
         if other.type == "ground" then
-            if other_top >= self_bottom then
-                self.dy = 0
-                self.gravity = 0
-            elseif other_bottom <= self_top then
-                self.dy = 0 
-            end
-        else
-           self.gravity = self.GRAVITY 
+            self.dy = 0
+            self.gravity = 0
         end
     end 
 
+    -- feet collisions
     for other, seperating_vector in pairs(feet_collisions) do
         if other.type == "ground" and math.abs(self.dy) < 1 then
            self.can_jump = true 
         end
     end
+    
+    -- jumping
+    if love.keyboard.isDown("up") and self.can_jump then
+        
+        self.dy = -self.jump_power
+        self.can_jump = false
+    end
 
     self.body:move(0, self.dy)
     self.x, self.y = self.body:center()
 
-
-    self.y = self.y - 20
+    self.x = self.x - 9
+    self.y = self.y - 16
+    
+    self.feet:moveTo(self.x + 9, self.y + 34 + self.dy)
 end
 
 function Player:draw()
 	self.anim:draw(self.img_walk, self.x, self.y)
+    
+    love.graphics.setColor(255, 0, 0)
+    self.body:draw('line')
+    love.graphics.setColor(0, 255, 0)
+    self.feet:draw('line')
+    love.graphics.print(tostring(self.can_jump) .. ' ' .. tostring(vx) .. ' ' .. tostring(vy), 5, 5)
+    love.graphics.setColor(255, 255, 255)
 end
 
 return Player

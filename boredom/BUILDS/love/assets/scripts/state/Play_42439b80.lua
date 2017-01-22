@@ -2,30 +2,72 @@
 	Play state code
 ]]--
 
-local Play = {}
-
-local img_ground
 local sb_ground
-
 local coll_ground = {}
-local entities = {}
 
-local collider
+local player
+
+function load_level(name)
+	local data = require('assets.levels.' .. name)
+    local img_ground = assets:img_ground()
+    
+    for it, t in pairs(data.layers) do
+        -- load ground tiles
+       	if t.name == "ground" then
+           	for id, d in pairs(t.data) do
+            	if d > 0 then
+                   	local x = id % t.width * 32 - 32
+                    local y = math.floor(id / t.width) * 32
+                    
+                    d = d - 1
+                    local img_x = d % 4 * 33
+                    local img_y = math.floor(d / 4) * 33
+                    
+                    local quad = love.graphics.newQuad(img_x, img_y, 33, 33, img_ground:getWidth(), img_ground:getHeight())
+                    sb_ground:add(quad, x, y)
+                end
+            end
+        end
+        
+        -- ground collision boxes
+		if t.name == "collision" then
+           	for io, o in pairs(t.objects) do
+                local args = {}
+               	for ip, p in pairs(o.polyline) do
+                    if ip < #o.polyline then
+                        table.insert(args, p.x + o.x)
+                        table.insert(args, p.y + o.y) 
+                    end
+                end
+                local new_poly = HC.polygon(unpack(args))
+                new_poly.type = "ground"
+                table.insert(coll_ground, new_poly)
+            end
+        end
+        
+        -- spawn the player
+        if t.name == "player" then
+           	for io, o in pairs(t.objects) do
+               	player = Player(o.x, o.y) 
+            end
+        end
+    end
+end
+
+local Play = {}
 
 -- Called once, and only once, before entering the state the first time.
 function Play:init()
-	collider = HC.new()
+
 end
 
 -- Called every time when entering the state.
 function Play:enter(previous)
-	love.graphics.setBackgroundColor(255,255,255)
+    love.graphics.setBackgroundColor(255, 255, 255)
     
-    -- setup ground spritebatch
-    img_ground = assets:img_ground()
-    sb_ground = love.graphics.newSpriteBatch(img_ground)
-        
-    level = load_level('level1')
+    sb_ground = love.graphics.newSpriteBatch(assets:img_ground())
+    
+	load_level('level1')
 end
 
 function Play:leave()
@@ -33,74 +75,19 @@ function Play:leave()
 end 
 
 function Play:update(dt)
-    for ie, e in pairs(entities) do
-       	e:update(dt) 
-    end
+	player:update(dt)
 end
 
 function Play:draw()
-    for ie, e in pairs(entities) do
-       	e:draw()
-    end
-    
+    player:draw()    
 	love.graphics.draw(sb_ground)
     
-    love.graphics.setColor(255,0,0)
-    for icg, cg in pairs(coll_ground) do
-       	cg:draw('line') 
+    love.graphics.setColor(255, 0, 0)
+    for ic, c in pairs(coll_ground) do
+       	c:draw('line') 
     end
-    love.graphics.setColor(255,255,255)
+    love.graphics.setColor(255, 255, 255)
 end	
 
-function load_level(level_name)
-    map = love.filesystem.load('/assets/levels/' .. level_name .. '.lua')()
-       
-    for il, l in pairs(map.layers) do
-        -- add ground tiles to spritebatch
-    	if l.name == "ground" then            
-        	for it, t in pairs(l.data) do
-                if t > 0 then
-                    x = it % l.width
-                    y = math.floor(it / l.width)
-                    
-                    t = t - 1
-                    fx = t % 4
-                    fy = math.floor(t / 4)
-
-                    quad = love.graphics.newQuad(fx * 33, fy * 33, 33, 33, img_ground:getWidth(), img_ground:getHeight())
-               		sb_ground:add(quad, x * 32, y * 32)
-                end
-            end
-        end
-        
-        -- ground collision polygons
-        if l.name == "collision" then
-            for io, o in pairs(l.objects) do
-                
-				local coords = {}
-               	for ip, p in pairs(o.polyline) do
-                    if (ip < #o.polyline) then
-                        -- 32 and 1 are weird offsets that needed to be set
-                        table.insert(coords, p.x + o.x + 32)
-                        table.insert(coords, p.y + o.y + 1)
-                    end
-                end
-                
-                local new_poly = collider:polygon(unpack(coords))
-                new_poly.type = "ground"
-                collider:register(new_poly)
-               	table.insert(coll_ground, new_poly)
-            end
-        end
-        
-        -- spawn player
-        if l.name == "player" then
-           	local x = l.objects[1].x
-            local y = l.objects[1].y
-            
-            table.insert(entities, Player(x, y))
-        end
-    end
-end
-
 return Play
+
