@@ -6,11 +6,10 @@ Vector = require 'plugins.hump.vector'
 Camera = require 'plugins.hump.camera'
 anim8 = require 'plugins.anim8'
 
+HC = require 'assets.includes.HC'
 require 'assets.includes.printr'
 
 assets = require 'assets'
-_Entity = require 'plugins.blanke.Entity'
-
 
 <INCLUDES>
 

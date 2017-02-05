@@ -14,7 +14,7 @@ function entity0:init()
 	-- Signal.register('draw', self.draw)
 end
 
-function entity0:update(dt)
+function entity0:postUpdate(dt)
 	self.spr:update(dt)
 end
 

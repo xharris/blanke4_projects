@@ -14,7 +14,7 @@ var map_height;
 var keys;
 
 var new_player;
-var camera_scale = 2;
+var camera_scale = 1;
 
 var dirt_map, dirt_layer;
 var grass_layer, grass_map;

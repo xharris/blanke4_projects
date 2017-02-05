@@ -21,7 +21,7 @@ other_players = {}
 tiles = {}
 frags = {}
 
-kill_wall_v = 0 -- 1.1
+kill_wall_v = 1.1
 kill_wall = HC.rectangle(level_offset.x, -1000000, 1, 2000000)
 kill_wall.type = "kill_wall"
 HC.register(kill_wall)

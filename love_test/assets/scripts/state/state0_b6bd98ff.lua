@@ -6,7 +6,8 @@ local state0 = {}
 
 -- Called once, and only once, before entering the state the first time.
 function state0:init()
-	self.ent = entity0()
+    love.graphics.setBackgroundColor(255,255,255)
+	self.ent = entity1()
 end
 
 -- Called every time when entering the state.
@@ -19,7 +20,7 @@ function state0:leave()
 end 
 
 function state0:update(dt)
-
+	self.ent:update(dt)
 end
 
 function state0:draw()
