@@ -10,6 +10,7 @@ HC = require 'assets.includes.HC'
 require 'assets.includes.printr'
 
 assets = require 'assets'
+_Entity = require 'plugins.blanke.Entity'
 
 <INCLUDES>
 
