@@ -48,7 +48,7 @@ function Player:preUpdate(dt)
         self.hspeed = 0
     end
     
-    local body_collisions = HC.collisions(self.body)
+    local body_collisions = HC.neighbors(self.body)
     local feet_collisions = HC.collisions(self.feet)
     
     -- gravity    

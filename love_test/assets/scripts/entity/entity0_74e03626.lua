@@ -1,5 +1,5 @@
 --[[
-	entity0 entity class
+	ent_penguin entity class
 ]]--
 local assets = require "assets"
 
@@ -7,7 +7,7 @@ entity0 = Class{}
 
 function entity0:init()
 	self.img = assets:image0()
-	self.spr = assets:spritesheet0()
+	self.spr = assets:spr_penguin_walk()
 	self.ani_walk = anim8.newAnimation(self.spr('1-2',1), 0.1)
 	-- self.variable = value
 	-- Signal.register('update', self.update)

@@ -1,18 +1,6 @@
-Signal = require 'plugins.hump.signal'
-Gamestate = require 'plugins.hump.gamestate'
-Class = require 'plugins.hump.class'
-Timer = require 'plugins.hump.timer'
-Vector = require 'plugins.hump.vector'
-Camera = require 'plugins.hump.camera'
-anim8 = require 'plugins.anim8'
+require "assets.includes.printr"
 
-require 'assets.includes.printr'
-
-assets = require 'assets'
-_Entity = require 'plugins.blanke.Entity'
-
-
-<INCLUDES>
+require 'includes'
 
 function love.load()
 	-- register gamestates

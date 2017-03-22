@@ -1,22 +1,25 @@
 --[[
-	entity1 entity class
+	ent_penguin entity class
 ]]--
 
-entity1 = Class{}
-entity1:include(_Entity)
+ent_penguin = Class{}
 
-function entity1:init() 
-	self:addAnimation('walk', 'spritesheet0', {'1-2', 1}, 0.4)
+function ent_penguin:init(x, y)
+    ent_penguin:include(_Entity)
+
+    self.x = x
+    self.y = y
+    
+    self:addShape("main", "rectangle", {0, 0, 32, 32})
+    self:setMainShape("main")
+    
+	self:addAnimation('walk', 'spr_penguin_walk', {'1-2', 1}, 0.4)
     self.sprite_index = "walk"
     
-    self.x = love.graphics.getWidth()/2
-    self.y = love.graphics.getHeight()/2
-    
     self.friction = 0.05
-    self.gravity_direction = 90
 end
 
-function entity1:preUpdate(dt) 
+function ent_penguin:preUpdate(dt) 
     if love.mouse.isDown(1) then
        	self:move_towards_point(love.mouse.getX(), love.mouse.getY(), 100) 
     end
@@ -24,11 +27,11 @@ function entity1:preUpdate(dt)
     self.sprite_angle = self.direction + 90
 end
 
-function entity1:postUpdate(dt)
+function ent_penguin:postUpdate(dt)
 
 end	
 
-function entity1:preDraw()
+function ent_penguin:preDraw()
 	self.sprite_xoffset = self.sprite_width / 2
     self.sprite_yoffset = self.sprite_height / 2
     
@@ -39,8 +42,8 @@ function entity1:preDraw()
     ]]--
 end
 
-function entity1:postDraw()
+function ent_penguin:postDraw()
 
 end
 
-return entity1
+return ent_penguin
