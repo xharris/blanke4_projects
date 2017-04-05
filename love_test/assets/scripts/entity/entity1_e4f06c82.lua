@@ -1,5 +1,5 @@
 --[[
-	ent_penguin entity class
+	player entity class
 ]]--
 
 ent_ground = Class{}
